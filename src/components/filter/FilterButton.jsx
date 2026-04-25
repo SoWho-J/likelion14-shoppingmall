@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import ArrowIcon from "../../../assets/icons/Vector.svg";
+import ArrowIcon from "../../assets/icons/Vector.svg";
 
 export default function FilterButton({ text, onClick }) {
   return (
