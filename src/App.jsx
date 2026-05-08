@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import RootLayout from "./layout/RootLayout.jsx";
 import Main from "./pages/Main/Main.jsx";
 import ItemDetail from "./pages/ItemDetail/ItemDetail.jsx";
+import AddProduct from "./pages/AddProduct/AddProduct.jsx";
 
 function App() {
   return (
@@ -9,7 +10,9 @@ function App() {
       <Routes>
         <Route element={<RootLayout />}>
           <Route path="/" element={<Main />} />
-          <Route path="/add" element={<></>} />
+
+          {/* 상품 등록 */}
+          <Route path="/add" element={<AddProduct />} />
 
           {/* 상품 상세 */}
           <Route path="/item/:id" element={<ItemDetail />} />
