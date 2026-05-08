@@ -1,7 +1,8 @@
 import { useState } from "react";
 import styled from "styled-components";
 import CheckIcon from "../../assets/icons/check.svg";
-import ProductList, { DUMMY_PRODUCTS } from "./ProductList";
+import ProductList from "./ProductList";
+import { DUMMY_PRODUCTS } from "../../data/product";
 
 const PRICE_MAP = {
   "0~30": [0, 300000],
