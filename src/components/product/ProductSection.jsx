@@ -12,52 +12,88 @@ const PRICE_MAP = {
 
 const SORT_OPTIONS = ["기본 정렬순", "평점 높은순", "리뷰 많은순"];
 
+function normalizeText(value) {
+  return String(value ?? "").trim();
+}
+
 function normalizeGender(gender) {
-  if (gender === "male") return "남성";
-  if (gender === "female") return "여성";
-  if (gender === "unisex") return "남녀공용";
-  return gender;
+  const value = normalizeText(gender);
+
+  if (value === "male") return "남성";
+  if (value === "female") return "여성";
+  if (value === "unisex") return "남녀공용";
+
+  return value;
 }
 
 function normalizeCategory(category, type) {
-  if (category) return category;
-  if (type === "shoes") return "신발";
-  if (type === "shirt") return "의류";
-  return category;
+  const categoryValue = normalizeText(category);
+  const typeValue = normalizeText(type);
+
+  if (categoryValue) return categoryValue;
+  if (typeValue === "shoes") return "신발";
+  if (typeValue === "shirt") return "의류";
+
+  return "";
 }
 
-function applyFilters(products, filters) {
+function normalizeColor(color) {
+  return normalizeText(color).toLowerCase();
+}
+
+function normalizeSizes(size) {
+  return String(size ?? "")
+    .split(",")
+    .map((s) => s.trim().toUpperCase())
+    .filter(Boolean);
+}
+
+function applyFilters(products, filters = {}) {
   return products.filter((p) => {
     const gender = normalizeGender(p.gender);
+    const color = normalizeColor(p.color);
     const category = normalizeCategory(p.category, p.type);
+    const productSizes = normalizeSizes(p.size);
+    const price = Number(p.price);
 
     if (filters["성별"]?.length && !filters["성별"].includes(gender)) {
       return false;
     }
 
-    if (filters["색상"]?.length && !filters["색상"].includes(p.color)) {
-      return false;
+    if (filters["색상"]?.length) {
+      const selectedColors = filters["색상"].map((item) =>
+        normalizeColor(item),
+      );
+
+      if (!selectedColors.includes(color)) {
+        return false;
+      }
     }
 
     if (filters["사이즈"]?.length) {
-      const productSizes = String(p.size)
-        .split(",")
-        .map((s) => s.trim().toUpperCase());
+      const selectedSizes = filters["사이즈"].map((item) =>
+        normalizeText(item).toUpperCase(),
+      );
 
-      const filterSizes = filters["사이즈"].map((s) => s.toUpperCase());
+      const hasSize = productSizes.some((size) => selectedSizes.includes(size));
 
-      if (!productSizes.some((size) => filterSizes.includes(size))) {
+      if (!hasSize) {
         return false;
       }
     }
 
     if (filters["가격대"]?.length) {
       const inRange = filters["가격대"].some((range) => {
-        const [min, max] = PRICE_MAP[range];
-        return p.price >= min && p.price <= max;
+        const priceRange = PRICE_MAP[range];
+        if (!priceRange) return false;
+
+        const [min, max] = priceRange;
+        return price >= min && price <= max;
       });
 
-      if (!inRange) return false;
+      if (!inRange) {
+        return false;
+      }
     }
 
     if (filters["종류"]?.length && !filters["종류"].includes(category)) {
@@ -66,6 +102,17 @@ function applyFilters(products, filters) {
 
     return true;
   });
+}
+
+function removeDuplicateProducts(products) {
+  const map = new Map();
+
+  products.forEach((product) => {
+    const key = `${product.type}-${product.id}`;
+    map.set(key, product);
+  });
+
+  return Array.from(map.values());
 }
 
 export default function ProductSection({ filters }) {
@@ -79,7 +126,10 @@ export default function ProductSection({ filters }) {
         const shoes = await getProducts("shoes");
         const shirts = await getProducts("shirt");
 
-        setProducts([...shoes, ...shirts]);
+        const mergedProducts = [...shoes, ...shirts];
+        const uniqueProducts = removeDuplicateProducts(mergedProducts);
+
+        setProducts(uniqueProducts);
       } catch (error) {
         console.error(error);
       }
@@ -92,14 +142,17 @@ export default function ProductSection({ filters }) {
 
   const sorted = [...filtered].sort((a, b) => {
     if (sort === "평점 높은순") {
-      return b.rating - a.rating;
+      return Number(b.rating ?? 0) - Number(a.rating ?? 0);
     }
 
     if (sort === "리뷰 많은순") {
-      return (b.reviewCount ?? b.reviews) - (a.reviewCount ?? a.reviews);
+      return (
+        Number(b.reviewCount ?? b.reviews ?? 0) -
+        Number(a.reviewCount ?? a.reviews ?? 0)
+      );
     }
 
-    return (a.createdAt ?? 0) - (b.createdAt ?? 0);
+    return Number(a.createdAt ?? 0) - Number(b.createdAt ?? 0);
   });
 
   return (

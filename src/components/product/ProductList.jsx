@@ -5,7 +5,7 @@ export default function ProductList({ products }) {
   return (
     <Grid>
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+        <ProductCard key={`${product.type}-${product.id}`} product={product} />
       ))}
     </Grid>
   );
