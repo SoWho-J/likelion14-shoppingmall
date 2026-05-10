@@ -15,7 +15,7 @@ function App() {
           <Route path="/add" element={<AddProduct />} />
 
           {/* 상품 상세 */}
-          <Route path="/item/:id" element={<ItemDetail />} />
+          <Route path="/item/:type/:id" element={<ItemDetail />} />
         </Route>
       </Routes>
     </BrowserRouter>
