@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import styled from "styled-components";
 import UploadIconImage from "../../assets/icons/UploadIcon.png";
+import UploadIconClickImage from "../../assets/icons/UploadIconClick.png";
 import { createProduct } from "../../api/productApi";
 import { useNavigate } from "react-router-dom";
 
@@ -23,6 +24,7 @@ export default function AddProduct() {
   const fileInputRef = useRef(null);
 
   const [previewImage, setPreviewImage] = useState("");
+  const [isHover, setIsHover] = useState(false);
 
   const [name, setName] = useState("");
   const [rating, setRating] = useState("");
@@ -85,7 +87,11 @@ export default function AddProduct() {
 
   return (
     <PageWrap>
-      <ImageUploadBox onClick={handleImageClick}>
+      <ImageUploadBox
+        onClick={handleImageClick}
+        onMouseEnter={() => setIsHover(true)}
+        onMouseLeave={() => setIsHover(false)}
+      >
         <HiddenFileInput
           ref={fileInputRef}
           type="file"
@@ -93,11 +99,14 @@ export default function AddProduct() {
           onChange={handleImageChange}
         />
 
-        {previewImage ? (
-          <PreviewImage src={previewImage} alt="preview" />
-        ) : (
-          <UploadIcon src={UploadIconImage} alt="upload" />
-        )}
+        {previewImage && <PreviewImage src={previewImage} alt="preview" />}
+
+        <UploadOverlay>
+          <UploadIcon
+            src={isHover ? UploadIconClickImage : UploadIconImage}
+            alt="upload"
+          />
+        </UploadOverlay>
       </ImageUploadBox>
 
       <Divider />
@@ -197,6 +206,8 @@ const PageWrap = styled.div`
 `;
 
 const ImageUploadBox = styled.div`
+  position: relative;
+
   width: 407px;
   height: 533px;
   border-radius: 12px;
@@ -219,6 +230,14 @@ const UploadIcon = styled.img`
   width: 70px;
   height: 70px;
   object-fit: contain;
+`;
+
+const UploadOverlay = styled.div`
+  position: absolute;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const PreviewImage = styled.img`
