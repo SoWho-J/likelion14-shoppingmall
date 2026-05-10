@@ -47,3 +47,18 @@ export async function deleteProduct(type, id) {
 
   return res.json();
 }
+export async function updateProduct(type, id, productData) {
+  const res = await fetch(`${BASE_URL}/${type}/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(productData),
+  });
+
+  if (!res.ok) {
+    throw new Error("상품 수정 실패");
+  }
+
+  return res.json();
+}
