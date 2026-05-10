@@ -2,6 +2,57 @@ import styled from "styled-components";
 import logoUrl from "../../assets/images/kream_image.png";
 import { useLocation, useNavigate } from "react-router-dom";
 
+export default function Header() {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+
+  const isMainPage = pathname === "/";
+  const isAddPage = pathname === "/add";
+  const isDetailPage = pathname.startsWith("/item/");
+  const isEditPage = pathname.startsWith("/edit/");
+
+  const pathParts = pathname.split("/");
+  const detailType = pathParts[2];
+  const detailId = pathParts[3];
+
+  return (
+    <HeaderContainer>
+      <LogoImage src={logoUrl} onClick={() => navigate("/")} />
+
+      <HeaderRight>
+        <ButtonRow>
+          {(isMainPage || isAddPage || isDetailPage || isEditPage) && (
+            <HeaderButton $active={isAddPage} onClick={() => navigate("/add")}>
+              상품등록
+            </HeaderButton>
+          )}
+
+          {(isDetailPage || isEditPage) && (
+            <>
+              <HeaderButton
+                onClick={() =>
+                  navigate(`/item/${detailType}/${detailId}?delete=true`)
+                }
+              >
+                상품삭제
+              </HeaderButton>
+
+              <HeaderButton
+                $active={isEditPage}
+                onClick={() => navigate(`/edit/${detailType}/${detailId}`)}
+              >
+                상품수정
+              </HeaderButton>
+            </>
+          )}
+        </ButtonRow>
+
+        <HomeButton onClick={() => navigate("/")}>HOME</HomeButton>
+      </HeaderRight>
+    </HeaderContainer>
+  );
+}
+
 const LogoImage = styled.img`
   width: 166px;
   height: 141px;
@@ -59,40 +110,3 @@ const HomeButton = styled.button`
 
   cursor: pointer;
 `;
-
-export default function Header() {
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
-
-  const isMainPage = pathname === "/";
-  const isAddPage = pathname === "/add";
-  const isDetailPage = pathname.startsWith("/item/");
-
-  return (
-    <HeaderContainer>
-      <LogoImage src={logoUrl} onClick={() => navigate("/")} />
-
-      <HeaderRight>
-        <ButtonRow>
-          {(isMainPage || isAddPage || isDetailPage) && (
-            <HeaderButton $active={isAddPage} onClick={() => navigate("/add")}>
-              상품등록
-            </HeaderButton>
-          )}
-
-          {isDetailPage && (
-            <>
-              <HeaderButton onClick={() => navigate(`${pathname}?delete=true`)}>
-                상품삭제
-              </HeaderButton>
-
-              <HeaderButton>상품수정</HeaderButton>
-            </>
-          )}
-        </ButtonRow>
-
-        <HomeButton onClick={() => navigate("/")}>HOME</HomeButton>
-      </HeaderRight>
-    </HeaderContainer>
-  );
-}
