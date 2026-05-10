@@ -1,20 +1,38 @@
+import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
-import { DUMMY_PRODUCTS } from "../../data/product";
+import { deleteProduct, getProductDetail } from "../../api/productApi";
 
 export default function ItemDetail() {
-  const { id } = useParams();
+  const { type, id } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const [product, setProduct] = useState(null);
   const isDeleteOpen = searchParams.get("delete") === "true";
 
-  const product = DUMMY_PRODUCTS.find((item) => item.id === Number(id));
+  useEffect(() => {
+    async function fetchProductDetail() {
+      try {
+        const data = await getProductDetail(type, id);
+        setProduct(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    fetchProductDetail();
+  }, [type, id]);
 
   if (!product) return <NotFound>상품을 찾을 수 없습니다.</NotFound>;
 
-  const handleDelete = () => {
-    navigate("/");
+  const handleDelete = async () => {
+    try {
+      await deleteProduct(type, id);
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -31,7 +49,9 @@ export default function ItemDetail() {
           <ReviewRow>
             <Star>★</Star>
             <Rating>{product.rating}</Rating>
-            <Review>리뷰 {product.reviewCount.toLocaleString()}</Review>
+            <Review>
+              리뷰 {(product.reviewCount ?? product.reviews).toLocaleString()}
+            </Review>
           </ReviewRow>
         </InfoSection>
       </DetailWrap>

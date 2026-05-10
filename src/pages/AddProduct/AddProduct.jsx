@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import styled from "styled-components";
 import UploadIconImage from "../../assets/icons/UploadIcon.png";
+import { createProduct } from "../../api/productApi";
+import { useNavigate } from "react-router-dom";
 
 const CATEGORY_OPTIONS = ["의류", "신발"];
 const GENDER_OPTIONS = ["남성", "여성", "남녀공용"];
@@ -17,14 +19,85 @@ const COLOR_OPTIONS = [
 ];
 
 export default function AddProduct() {
+  const navigate = useNavigate();
+  const fileInputRef = useRef(null);
+
+  const [previewImage, setPreviewImage] = useState("");
+
+  const [name, setName] = useState("");
+  const [rating, setRating] = useState("");
+  const [reviews, setReviews] = useState("");
+  const [price, setPrice] = useState("");
+  const [size, setSize] = useState("");
+
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
 
+  const handleImageClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setPreviewImage(reader.result);
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = async () => {
+    const type = selectedCategory === "신발" ? "shoes" : "shirt";
+
+    const newProduct = {
+      image: previewImage,
+      name,
+      rating: Number(rating),
+      reviewCount: Number(reviews),
+      reviews: Number(reviews),
+      price: Number(price),
+      soldout: false,
+      color: selectedColor,
+      size,
+      gender:
+        selectedGender === "남성"
+          ? "남성"
+          : selectedGender === "여성"
+            ? "여성"
+            : "남녀공용",
+      category: selectedCategory,
+      type,
+      createdAt: Date.now(),
+    };
+
+    try {
+      await createProduct(type, newProduct);
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <PageWrap>
-      <ImageUploadBox>
-        <UploadIcon src={UploadIconImage} alt="upload" />
+      <ImageUploadBox onClick={handleImageClick}>
+        <HiddenFileInput
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+        />
+
+        {previewImage ? (
+          <PreviewImage src={previewImage} alt="preview" />
+        ) : (
+          <UploadIcon src={UploadIconImage} alt="upload" />
+        )}
       </ImageUploadBox>
 
       <Divider />
@@ -34,27 +107,27 @@ export default function AddProduct() {
 
         <InputGroup>
           <Label>상품명</Label>
-          <Input />
+          <Input value={name} onChange={(e) => setName(e.target.value)} />
         </InputGroup>
 
         <InputGroup>
           <Label>평점</Label>
-          <Input />
+          <Input value={rating} onChange={(e) => setRating(e.target.value)} />
         </InputGroup>
 
         <InputGroup>
           <Label>리뷰수</Label>
-          <Input />
+          <Input value={reviews} onChange={(e) => setReviews(e.target.value)} />
         </InputGroup>
 
         <InputGroup>
           <Label>가격</Label>
-          <Input />
+          <Input value={price} onChange={(e) => setPrice(e.target.value)} />
         </InputGroup>
 
         <InputGroup>
           <Label>사이즈</Label>
-          <Input />
+          <Input value={size} onChange={(e) => setSize(e.target.value)} />
         </InputGroup>
 
         <OptionSection>
@@ -63,6 +136,7 @@ export default function AddProduct() {
             {CATEGORY_OPTIONS.map((item) => (
               <OptionButton
                 key={item}
+                type="button"
                 $active={selectedCategory === item}
                 onClick={() => setSelectedCategory(item)}
               >
@@ -78,6 +152,7 @@ export default function AddProduct() {
             {GENDER_OPTIONS.map((item) => (
               <OptionButton
                 key={item}
+                type="button"
                 $active={selectedGender === item}
                 onClick={() => setSelectedGender(item)}
               >
@@ -93,6 +168,7 @@ export default function AddProduct() {
             {COLOR_OPTIONS.map((item) => (
               <OptionButton
                 key={item}
+                type="button"
                 $active={selectedColor === item}
                 onClick={() => setSelectedColor(item)}
               >
@@ -102,7 +178,9 @@ export default function AddProduct() {
           </ColorGrid>
         </OptionSection>
 
-        <SubmitButton>상품 등록 완료</SubmitButton>
+        <SubmitButton type="button" onClick={handleSubmit}>
+          상품 등록 완료
+        </SubmitButton>
       </FormCard>
     </PageWrap>
   );
@@ -130,11 +208,22 @@ const ImageUploadBox = styled.div`
   justify-content: center;
 
   cursor: pointer;
+  overflow: hidden;
+`;
+
+const HiddenFileInput = styled.input`
+  display: none;
 `;
 
 const UploadIcon = styled.img`
   width: 70px;
   height: 70px;
+  object-fit: contain;
+`;
+
+const PreviewImage = styled.img`
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 `;
 
