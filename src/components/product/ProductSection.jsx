@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import CheckIcon from "../../assets/icons/check.svg";
 import ProductList from "./ProductList";
-import { DUMMY_PRODUCTS } from "../../data/product";
+import { getProducts } from "../../api/productApi";
 
 const PRICE_MAP = {
   "0~30": [0, 300000],
@@ -12,9 +12,26 @@ const PRICE_MAP = {
 
 const SORT_OPTIONS = ["기본 정렬순", "평점 높은순", "리뷰 많은순"];
 
+function normalizeGender(gender) {
+  if (gender === "male") return "남성";
+  if (gender === "female") return "여성";
+  if (gender === "unisex") return "남녀공용";
+  return gender;
+}
+
+function normalizeCategory(category, type) {
+  if (category) return category;
+  if (type === "shoes") return "신발";
+  if (type === "shirt") return "의류";
+  return category;
+}
+
 function applyFilters(products, filters) {
   return products.filter((p) => {
-    if (filters["성별"]?.length && !filters["성별"].includes(p.gender)) {
+    const gender = normalizeGender(p.gender);
+    const category = normalizeCategory(p.category, p.type);
+
+    if (filters["성별"]?.length && !filters["성별"].includes(gender)) {
       return false;
     }
 
@@ -22,11 +39,16 @@ function applyFilters(products, filters) {
       return false;
     }
 
-    if (
-      filters["사이즈"]?.length &&
-      !p.size.some((s) => filters["사이즈"].includes(s))
-    ) {
-      return false;
+    if (filters["사이즈"]?.length) {
+      const productSizes = String(p.size)
+        .split(",")
+        .map((s) => s.trim().toUpperCase());
+
+      const filterSizes = filters["사이즈"].map((s) => s.toUpperCase());
+
+      if (!productSizes.some((size) => filterSizes.includes(size))) {
+        return false;
+      }
     }
 
     if (filters["가격대"]?.length) {
@@ -38,7 +60,7 @@ function applyFilters(products, filters) {
       if (!inRange) return false;
     }
 
-    if (filters["종류"]?.length && !filters["종류"].includes(p.category)) {
+    if (filters["종류"]?.length && !filters["종류"].includes(category)) {
       return false;
     }
 
@@ -47,15 +69,37 @@ function applyFilters(products, filters) {
 }
 
 export default function ProductSection({ filters }) {
+  const [products, setProducts] = useState([]);
   const [sort, setSort] = useState("기본 정렬순");
   const [isSortOpen, setIsSortOpen] = useState(false);
 
-  const filtered = applyFilters(DUMMY_PRODUCTS, filters);
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const shoes = await getProducts("shoes");
+        const shirts = await getProducts("shirt");
+
+        setProducts([...shoes, ...shirts]);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    fetchProducts();
+  }, []);
+
+  const filtered = applyFilters(products, filters);
 
   const sorted = [...filtered].sort((a, b) => {
-    if (sort === "평점 높은순") return b.rating - a.rating;
-    if (sort === "리뷰 많은순") return b.reviewCount - a.reviewCount;
-    return a.id - b.id;
+    if (sort === "평점 높은순") {
+      return b.rating - a.rating;
+    }
+
+    if (sort === "리뷰 많은순") {
+      return (b.reviewCount ?? b.reviews) - (a.reviewCount ?? a.reviews);
+    }
+
+    return (a.createdAt ?? 0) - (b.createdAt ?? 0);
   });
 
   return (
@@ -129,7 +173,7 @@ const SortOption = styled.div`
   padding: 10px 20px;
   font-size: 14px;
   font-family: "Pretendard", sans-serif;
-  color: ${({ $isActive }) => ($isActive ? "#333" : "#AFAFAF")};
+  color: ${({ $isActive }) => ($isActive ? "#333" : "#afafaf")};
   font-weight: ${({ $isActive }) => ($isActive ? "600" : "400")};
   cursor: pointer;
 

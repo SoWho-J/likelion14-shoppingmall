@@ -3,14 +3,20 @@ import { useNavigate } from "react-router-dom";
 
 export default function ProductCard({ product }) {
   const navigate = useNavigate();
+
   return (
-    <Card onClick={() => navigate(`/item/${product.id}`)}>
+    <Card onClick={() => navigate(`/item/${product.type}/${product.id}`)}>
       <ImageWrap>
         <img src={product.image} alt={product.name} />
       </ImageWrap>
+
       <Name>{product.name}</Name>
+
       <Price>{product.price.toLocaleString()}원</Price>
-      <Review>리뷰 {product.reviewCount.toLocaleString()}</Review>
+
+      <Review>
+        리뷰 {(product.reviewCount ?? product.reviews).toLocaleString()}
+      </Review>
     </Card>
   );
 }
@@ -31,9 +37,11 @@ const ImageWrap = styled.div`
   border-radius: 12px;
   border: none;
   overflow: hidden;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   margin-bottom: 8px;
 
   img {
@@ -46,34 +54,41 @@ const ImageWrap = styled.div`
 const Name = styled.p`
   align-self: stretch;
   color: #333;
+
   font-family: "Pretendard", sans-serif;
   font-size: 11px;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+
   margin: 0;
 `;
 
 const Price = styled.p`
   align-self: stretch;
   color: #000;
+
   font-family: "Pretendard", sans-serif;
   font-size: 11px;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+
   -webkit-text-stroke-width: 0.3px;
   -webkit-text-stroke-color: #000;
+
   margin: 0;
 `;
 
 const Review = styled.p`
   align-self: stretch;
   color: #a7a7a7;
+
   font-family: "Pretendard", sans-serif;
   font-size: 11px;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+
   margin: 0;
 `;
