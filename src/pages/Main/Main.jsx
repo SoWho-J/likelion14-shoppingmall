@@ -9,36 +9,33 @@ export default function Main() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
+    async function loadProducts() {
       try {
         const shoes = await getProducts("shoes");
         const clothes = await getProducts("clothes");
 
-        const mergedProducts = [...shoes, ...clothes];
+        const shoesWithType = shoes.map((item) => ({
+          ...item,
+          type: "shoes",
+        }));
 
-        if (!cancelled) {
-          setProducts(mergedProducts);
-        }
+        const clothesWithType = clothes.map((item) => ({
+          ...item,
+          type: "clothes",
+        }));
+
+        setProducts([...shoesWithType, ...clothesWithType]);
       } catch (error) {
         console.error(error);
-
-        if (!cancelled) {
-          setProducts([]);
-        }
       }
-    })();
+    }
 
-    return () => {
-      cancelled = true;
-    };
+    loadProducts();
   }, []);
 
   return (
     <MainWrap>
       <FilterSection onFilterChange={setFilters} />
-
       <ProductSection filters={filters} products={products} />
     </MainWrap>
   );
