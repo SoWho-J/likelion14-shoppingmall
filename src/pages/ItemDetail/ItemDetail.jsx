@@ -49,9 +49,7 @@ export default function ItemDetail() {
           <ReviewRow>
             <Star>★</Star>
             <Rating>{product.rating}</Rating>
-            <Review>
-              리뷰 {(product.reviewCount ?? product.reviews).toLocaleString()}
-            </Review>
+            <Review>리뷰 {product.reviews.toLocaleString()}</Review>
           </ReviewRow>
         </InfoSection>
       </DetailWrap>

@@ -14,9 +14,7 @@ export default function ProductCard({ product }) {
 
       <Price>{product.price.toLocaleString()}원</Price>
 
-      <Review>
-        리뷰 {(product.reviewCount ?? product.reviews).toLocaleString()}
-      </Review>
+      <Review>리뷰 {product.reviews.toLocaleString()}</Review>
     </Card>
   );
 }
@@ -57,9 +55,7 @@ const Name = styled.p`
 
   font-family: "Pretendard", sans-serif;
   font-size: 11px;
-  font-style: normal;
   font-weight: 400;
-  line-height: normal;
 
   margin: 0;
 `;
@@ -70,9 +66,7 @@ const Price = styled.p`
 
   font-family: "Pretendard", sans-serif;
   font-size: 11px;
-  font-style: normal;
   font-weight: 400;
-  line-height: normal;
 
   -webkit-text-stroke-width: 0.3px;
   -webkit-text-stroke-color: #000;
@@ -86,9 +80,7 @@ const Review = styled.p`
 
   font-family: "Pretendard", sans-serif;
   font-size: 11px;
-  font-style: normal;
   font-weight: 400;
-  line-height: normal;
 
   margin: 0;
 `;

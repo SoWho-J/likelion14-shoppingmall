@@ -32,7 +32,6 @@ function normalizeCategory(category, type) {
   if (categoryValue) return categoryValue;
   if (typeValue === "shoes") return "신발";
   if (typeValue === "clothes") return "의류";
-  if (typeValue === "shirt") return "의류";
 
   return "";
 }
@@ -85,7 +84,6 @@ function applyFilters(products, filters = {}) {
     if (filters["가격대"]?.length) {
       const inRange = filters["가격대"].some((range) => {
         const priceRange = PRICE_MAP[range];
-
         if (!priceRange) return false;
 
         const [min, max] = priceRange;
@@ -117,10 +115,7 @@ export default function ProductSection({ filters, products = [] }) {
     }
 
     if (sort === "리뷰 많은순") {
-      return (
-        Number(b.reviewCount ?? b.reviews ?? 0) -
-        Number(a.reviewCount ?? a.reviews ?? 0)
-      );
+      return Number(b.reviews ?? 0) - Number(a.reviews ?? 0);
     }
 
     return Number(a.createdAt ?? 0) - Number(b.createdAt ?? 0);

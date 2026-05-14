@@ -54,27 +54,22 @@ export default function AddProduct() {
   };
 
   const handleSubmit = async () => {
-    const type = selectedCategory === "신발" ? "shoes" : "shirt";
+    const type = selectedCategory === "신발" ? "shoes" : "clothes";
 
     const newProduct = {
       image: previewImage,
       name,
       rating: Number(rating),
-      reviewCount: Number(reviews),
       reviews: Number(reviews),
       price: Number(price),
-      soldout: false,
       color: selectedColor,
       size,
       gender:
         selectedGender === "남성"
-          ? "남성"
+          ? "male"
           : selectedGender === "여성"
-            ? "여성"
-            : "남녀공용",
-      category: selectedCategory,
-      type,
-      createdAt: Date.now(),
+            ? "female"
+            : "unisex",
     };
 
     try {

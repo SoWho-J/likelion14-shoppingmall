@@ -36,7 +36,6 @@ export default function EditProduct() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
-  const [createdAt, setCreatedAt] = useState(null);
 
   useEffect(() => {
     async function fetchProduct() {
@@ -46,13 +45,18 @@ export default function EditProduct() {
         setPreviewImage(data.image);
         setName(data.name);
         setRating(data.rating);
-        setReviews(data.reviewCount ?? data.reviews);
+        setReviews(data.reviews);
         setPrice(data.price);
         setSize(data.size);
-        setSelectedCategory(data.category);
-        setSelectedGender(data.gender);
+        setSelectedCategory(type === "shoes" ? "신발" : "의류");
+        setSelectedGender(
+          data.gender === "male"
+            ? "남성"
+            : data.gender === "female"
+              ? "여성"
+              : "남녀공용",
+        );
         setSelectedColor(data.color);
-        setCreatedAt(data.createdAt);
       } catch (error) {
         console.error(error);
       }
@@ -83,16 +87,16 @@ export default function EditProduct() {
       image: previewImage,
       name,
       rating: Number(rating),
-      reviewCount: Number(reviews),
       reviews: Number(reviews),
       price: Number(price),
-      soldout: false,
       color: selectedColor,
       size,
-      gender: selectedGender,
-      category: selectedCategory,
-      type,
-      createdAt,
+      gender:
+        selectedGender === "남성"
+          ? "male"
+          : selectedGender === "여성"
+            ? "female"
+            : "unisex",
     };
 
     try {
