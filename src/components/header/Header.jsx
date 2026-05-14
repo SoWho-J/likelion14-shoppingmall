@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import logoUrl from "../../assets/images/kream_image.png";
+import logoUrl from "../../assets/images/Kream.png";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Header() {
