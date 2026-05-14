@@ -12,10 +12,11 @@ export default function ProductList({ products }) {
 }
 
 const Grid = styled.div`
+  width: 1133px;
+
   display: grid;
   grid-template-columns: repeat(5, 181px);
   gap: 37px 57px;
-  margin-left: 158px;
-  margin-right: 149px;
-  margin-top: 20px;
+
+  margin: 35px auto 0;
 `;

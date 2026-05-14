@@ -60,8 +60,9 @@ const LogoImage = styled.img`
 `;
 
 const HeaderContainer = styled.div`
-  padding: 0 160px;
+  width: 1133px;
   height: 110px;
+  margin: 0 auto;
 
   display: flex;
   justify-content: space-between;
@@ -69,7 +70,6 @@ const HeaderContainer = styled.div`
 
   box-sizing: border-box;
 `;
-
 const HeaderRight = styled.div`
   display: flex;
   flex-direction: column;

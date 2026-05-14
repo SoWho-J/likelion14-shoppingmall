@@ -60,9 +60,10 @@ export default function FilterSection({ onFilterChange }) {
 }
 
 const FilterWrap = styled.div`
-  display: inline-flex;
+  width: 1133px;
+  margin: 28px auto 0;
+
+  display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: 153px;
-  margin-top: 28px;
 `;

@@ -153,11 +153,12 @@ export default function ProductSection({ filters, products = [] }) {
 }
 
 const SortBar = styled.div`
-  position: relative;
+  width: 1133px;
+  margin: 23px auto 0;
+
   display: flex;
   justify-content: flex-end;
-  margin-right: 153px;
-  margin-top: 16px;
+  position: relative;
 `;
 
 const SortButton = styled.button`
