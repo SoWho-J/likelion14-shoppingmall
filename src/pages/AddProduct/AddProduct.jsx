@@ -1,7 +1,6 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 import UploadIconImage from "../../assets/icons/UploadIcon.png";
-import UploadIconClickImage from "../../assets/icons/UploadIconClick.png";
 import { createProduct } from "../../api/productApi";
 import { useNavigate } from "react-router-dom";
 
@@ -21,11 +20,8 @@ const COLOR_OPTIONS = [
 
 export default function AddProduct() {
   const navigate = useNavigate();
-  const fileInputRef = useRef(null);
 
-  const [previewImage, setPreviewImage] = useState("");
-  const [isHover, setIsHover] = useState(false);
-
+  const [image, setImage] = useState("");
   const [name, setName] = useState("");
   const [rating, setRating] = useState("");
   const [reviews, setReviews] = useState("");
@@ -36,28 +32,23 @@ export default function AddProduct() {
   const [selectedGender, setSelectedGender] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
 
-  const handleImageClick = () => {
-    fileInputRef.current.click();
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      setPreviewImage(reader.result);
-    };
-
-    reader.readAsDataURL(file);
-  };
-
   const handleSubmit = async () => {
+    if (
+      !image ||
+      !name ||
+      !price ||
+      !selectedCategory ||
+      !selectedGender ||
+      !selectedColor
+    ) {
+      alert("필수 정보를 입력해주세요.");
+      return;
+    }
+
     const type = selectedCategory === "신발" ? "shoes" : "clothes";
 
     const newProduct = {
-      image: previewImage,
+      image,
       name,
       rating: Number(rating),
       reviews: Number(reviews),
@@ -77,31 +68,18 @@ export default function AddProduct() {
       navigate("/");
     } catch (error) {
       console.error(error);
+      alert("상품 등록에 실패했습니다.");
     }
   };
 
   return (
     <PageWrap>
-      <ImageUploadBox
-        onClick={handleImageClick}
-        onMouseEnter={() => setIsHover(true)}
-        onMouseLeave={() => setIsHover(false)}
-      >
-        <HiddenFileInput
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleImageChange}
-        />
-
-        {previewImage && <PreviewImage src={previewImage} alt="preview" />}
-
-        <UploadOverlay>
-          <UploadIcon
-            src={isHover ? UploadIconClickImage : UploadIconImage}
-            alt="upload"
-          />
-        </UploadOverlay>
+      <ImageUploadBox>
+        {image ? (
+          <PreviewImage src={image} alt="preview" />
+        ) : (
+          <UploadIcon src={UploadIconImage} alt="upload" />
+        )}
       </ImageUploadBox>
 
       <Divider />
@@ -130,12 +108,18 @@ export default function AddProduct() {
         </InputGroup>
 
         <InputGroup>
+          <Label>이미지 URL</Label>
+          <Input value={image} onChange={(e) => setImage(e.target.value)} />
+        </InputGroup>
+
+        <InputGroup>
           <Label>사이즈</Label>
           <Input value={size} onChange={(e) => setSize(e.target.value)} />
         </InputGroup>
 
         <OptionSection>
           <Label>종류</Label>
+
           <CategoryRow>
             {CATEGORY_OPTIONS.map((item) => (
               <OptionButton
@@ -152,6 +136,7 @@ export default function AddProduct() {
 
         <OptionSection>
           <Label>성별</Label>
+
           <GenderRow>
             {GENDER_OPTIONS.map((item) => (
               <OptionButton
@@ -168,6 +153,7 @@ export default function AddProduct() {
 
         <OptionSection>
           <Label>색상</Label>
+
           <ColorGrid>
             {COLOR_OPTIONS.map((item) => (
               <OptionButton
@@ -209,30 +195,16 @@ const ImageUploadBox = styled.div`
   background: #eee;
 
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
 
-  cursor: pointer;
   overflow: hidden;
-`;
-
-const HiddenFileInput = styled.input`
-  display: none;
 `;
 
 const UploadIcon = styled.img`
   width: 70px;
   height: 70px;
   object-fit: contain;
-`;
-
-const UploadOverlay = styled.div`
-  position: absolute;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
 `;
 
 const PreviewImage = styled.img`

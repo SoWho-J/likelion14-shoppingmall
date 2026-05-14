@@ -118,7 +118,7 @@ export default function ProductSection({ filters, products = [] }) {
       return Number(b.reviews ?? 0) - Number(a.reviews ?? 0);
     }
 
-    return Number(a.createdAt ?? 0) - Number(b.createdAt ?? 0);
+    return 0;
   });
 
   return (

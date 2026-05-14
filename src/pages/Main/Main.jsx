@@ -9,7 +9,9 @@ export default function Main() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    async function loadProducts() {
+    let cancelled = false;
+
+    (async () => {
       try {
         const shoes = await getProducts("shoes");
         const clothes = await getProducts("clothes");
@@ -24,13 +26,31 @@ export default function Main() {
           type: "clothes",
         }));
 
-        setProducts([...shoesWithType, ...clothesWithType]);
+        const mergedProducts = [...clothesWithType, ...shoesWithType];
+
+        console.log(
+          mergedProducts.map((p) => ({
+            name: p.name,
+            type: p.type,
+            createdAt: p.createdAt,
+          })),
+        );
+
+        if (!cancelled) {
+          setProducts(mergedProducts);
+        }
       } catch (error) {
         console.error(error);
-      }
-    }
 
-    loadProducts();
+        if (!cancelled) {
+          setProducts([]);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (

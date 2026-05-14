@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import UploadIconImage from "../../assets/icons/UploadIcon.png";
-import UploadIconClickImage from "../../assets/icons/UploadIconClick.png";
 import { getProductDetail, updateProduct } from "../../api/productApi";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -22,11 +21,8 @@ const COLOR_OPTIONS = [
 export default function EditProduct() {
   const { type, id } = useParams();
   const navigate = useNavigate();
-  const fileInputRef = useRef(null);
 
-  const [previewImage, setPreviewImage] = useState("");
-  const [isHover, setIsHover] = useState(false);
-
+  const [image, setImage] = useState("");
   const [name, setName] = useState("");
   const [rating, setRating] = useState("");
   const [reviews, setReviews] = useState("");
@@ -42,13 +38,15 @@ export default function EditProduct() {
       try {
         const data = await getProductDetail(type, id);
 
-        setPreviewImage(data.image);
+        setImage(data.image);
         setName(data.name);
         setRating(data.rating);
         setReviews(data.reviews);
         setPrice(data.price);
         setSize(data.size);
+
         setSelectedCategory(type === "shoes" ? "신발" : "의류");
+
         setSelectedGender(
           data.gender === "male"
             ? "남성"
@@ -56,6 +54,7 @@ export default function EditProduct() {
               ? "여성"
               : "남녀공용",
         );
+
         setSelectedColor(data.color);
       } catch (error) {
         console.error(error);
@@ -65,26 +64,21 @@ export default function EditProduct() {
     fetchProduct();
   }, [type, id]);
 
-  const handleImageClick = () => {
-    fileInputRef.current.click();
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      setPreviewImage(reader.result);
-    };
-
-    reader.readAsDataURL(file);
-  };
-
   const handleEdit = async () => {
+    if (
+      !image ||
+      !name ||
+      !price ||
+      !selectedCategory ||
+      !selectedGender ||
+      !selectedColor
+    ) {
+      alert("필수 정보를 입력해주세요.");
+      return;
+    }
+
     const updatedProduct = {
-      image: previewImage,
+      image,
       name,
       rating: Number(rating),
       reviews: Number(reviews),
@@ -104,31 +98,18 @@ export default function EditProduct() {
       navigate(`/item/${type}/${id}`);
     } catch (error) {
       console.error(error);
+      alert("상품 수정에 실패했습니다.");
     }
   };
 
   return (
     <PageWrap>
-      <ImageUploadBox
-        onClick={handleImageClick}
-        onMouseEnter={() => setIsHover(true)}
-        onMouseLeave={() => setIsHover(false)}
-      >
-        <HiddenFileInput
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleImageChange}
-        />
-
-        {previewImage && <PreviewImage src={previewImage} alt="preview" />}
-
-        <UploadOverlay>
-          <UploadIcon
-            src={isHover ? UploadIconClickImage : UploadIconImage}
-            alt="upload"
-          />
-        </UploadOverlay>
+      <ImageUploadBox>
+        {image ? (
+          <PreviewImage src={image} alt="preview" />
+        ) : (
+          <UploadIcon src={UploadIconImage} alt="upload" />
+        )}
       </ImageUploadBox>
 
       <Divider />
@@ -157,12 +138,18 @@ export default function EditProduct() {
         </InputGroup>
 
         <InputGroup>
+          <Label>이미지 URL</Label>
+          <Input value={image} onChange={(e) => setImage(e.target.value)} />
+        </InputGroup>
+
+        <InputGroup>
           <Label>사이즈</Label>
           <Input value={size} onChange={(e) => setSize(e.target.value)} />
         </InputGroup>
 
         <OptionSection>
           <Label>종류</Label>
+
           <CategoryRow>
             {CATEGORY_OPTIONS.map((item) => (
               <OptionButton
@@ -179,6 +166,7 @@ export default function EditProduct() {
 
         <OptionSection>
           <Label>성별</Label>
+
           <GenderRow>
             {GENDER_OPTIONS.map((item) => (
               <OptionButton
@@ -195,6 +183,7 @@ export default function EditProduct() {
 
         <OptionSection>
           <Label>색상</Label>
+
           <ColorGrid>
             {COLOR_OPTIONS.map((item) => (
               <OptionButton
@@ -222,44 +211,26 @@ const PageWrap = styled.div`
   align-items: center;
   justify-content: center;
   gap: 105px;
-
   margin-top: 30px;
   padding-bottom: 40px;
 `;
 
 const ImageUploadBox = styled.div`
   position: relative;
-
   width: 407px;
   height: 533px;
   border-radius: 12px;
   background: #eee;
-
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  cursor: pointer;
   overflow: hidden;
-`;
-
-const HiddenFileInput = styled.input`
-  display: none;
 `;
 
 const UploadIcon = styled.img`
   width: 70px;
   height: 70px;
   object-fit: contain;
-`;
-
-const UploadOverlay = styled.div`
-  position: absolute;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
 `;
 
 const PreviewImage = styled.img`
@@ -277,7 +248,6 @@ const Divider = styled.div`
 const FormCard = styled.div`
   width: 250px;
   padding: 29px 31px 27px;
-
   border-radius: 18px;
   background: #fff;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
@@ -285,11 +255,9 @@ const FormCard = styled.div`
 
 const Title = styled.h2`
   margin: 0 0 24px;
-
   color: #1a1a1a;
   -webkit-text-stroke-width: 0.5px;
   -webkit-text-stroke-color: #1a1a1a;
-
   font-family: "Pretendard", sans-serif;
   font-size: 24px;
   font-weight: 400;
@@ -301,7 +269,6 @@ const InputGroup = styled.div`
 
 const Label = styled.p`
   margin: 0 0 5px;
-
   color: #6c6c6c;
   font-family: "Pretendard", sans-serif;
   font-size: 12px;
@@ -312,10 +279,8 @@ const Input = styled.input`
   width: 100%;
   height: 25px;
   padding: 5px 10px;
-
   border-radius: 5px;
   border: 1px solid #6c6c6c;
-
   box-sizing: border-box;
   font-size: 12px;
 `;
@@ -344,16 +309,13 @@ const ColorGrid = styled.div`
 
 const OptionButton = styled.button`
   height: 27px;
-
   border-radius: 5px;
   border: 1px solid ${({ $active }) => ($active ? "#dfdfdf" : "#f2f2f2")};
   background: ${({ $active }) => ($active ? "#dfdfdf" : "#f2f2f2")};
-
   color: #333;
   font-family: "Pretendard", sans-serif;
   font-size: 12px;
   font-weight: 400;
-
   cursor: pointer;
 
   &:hover {
@@ -366,16 +328,13 @@ const SubmitButton = styled.button`
   width: 100%;
   height: 27px;
   margin-top: 8px;
-
   border-radius: 5px;
   border: 1px solid #f2f2f2;
   background: #f2f2f2;
-
   color: #333;
   font-family: "Pretendard", sans-serif;
   font-size: 12px;
   font-weight: 400;
-
   cursor: pointer;
 
   &:hover {

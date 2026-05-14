@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
-import { deleteProduct, getProductDetail } from "../../api/productApi";
+import {
+  deleteProduct,
+  getProductDetail,
+  patchProduct,
+} from "../../api/productApi";
 
 export default function ItemDetail() {
   const { type, id } = useParams();
@@ -35,6 +39,23 @@ export default function ItemDetail() {
     }
   };
 
+  const handleReviewUpdate = async () => {
+    try {
+      const nextReviews = Number(product.reviews) + 1;
+
+      await patchProduct(type, id, {
+        reviews: nextReviews,
+      });
+
+      setProduct({
+        ...product,
+        reviews: nextReviews,
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <PageWrap>
       <DetailWrap $dimmed={isDeleteOpen}>
@@ -51,6 +72,8 @@ export default function ItemDetail() {
             <Rating>{product.rating}</Rating>
             <Review>리뷰 {product.reviews.toLocaleString()}</Review>
           </ReviewRow>
+
+          <ReviewButton onClick={handleReviewUpdate}>리뷰 증가</ReviewButton>
         </InfoSection>
       </DetailWrap>
 
@@ -136,6 +159,25 @@ const Rating = styled.span`
 
 const Review = styled.span`
   color: #9b9b9b;
+`;
+
+const ReviewButton = styled.button`
+  margin-top: 20px;
+  width: 120px;
+  height: 32px;
+
+  border: none;
+  border-radius: 6px;
+  background: #f2f2f2;
+
+  color: #333;
+  font-family: "Pretendard", sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+
+  &:hover {
+    background: #dfdfdf;
+  }
 `;
 
 const Overlay = styled.div`
