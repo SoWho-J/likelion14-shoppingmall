@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 import CheckIcon from "../../assets/icons/check.svg";
 import ProductList from "./ProductList";
-import { getProducts } from "../../api/productApi";
 
 const PRICE_MAP = {
   "0~30": [0, 300000],
@@ -32,6 +31,7 @@ function normalizeCategory(category, type) {
 
   if (categoryValue) return categoryValue;
   if (typeValue === "shoes") return "신발";
+  if (typeValue === "clothes") return "의류";
   if (typeValue === "shirt") return "의류";
 
   return "";
@@ -85,6 +85,7 @@ function applyFilters(products, filters = {}) {
     if (filters["가격대"]?.length) {
       const inRange = filters["가격대"].some((range) => {
         const priceRange = PRICE_MAP[range];
+
         if (!priceRange) return false;
 
         const [min, max] = priceRange;
@@ -104,39 +105,9 @@ function applyFilters(products, filters = {}) {
   });
 }
 
-function removeDuplicateProducts(products) {
-  const map = new Map();
-
-  products.forEach((product) => {
-    const key = `${product.type}-${product.id}`;
-    map.set(key, product);
-  });
-
-  return Array.from(map.values());
-}
-
-export default function ProductSection({ filters }) {
-  const [products, setProducts] = useState([]);
+export default function ProductSection({ filters, products = [] }) {
   const [sort, setSort] = useState("기본 정렬순");
   const [isSortOpen, setIsSortOpen] = useState(false);
-
-  useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const shoes = await getProducts("shoes");
-        const shirts = await getProducts("shirt");
-
-        const mergedProducts = [...shoes, ...shirts];
-        const uniqueProducts = removeDuplicateProducts(mergedProducts);
-
-        setProducts(uniqueProducts);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    fetchProducts();
-  }, []);
 
   const filtered = applyFilters(products, filters);
 
