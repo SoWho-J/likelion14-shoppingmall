@@ -1,64 +1,30 @@
-const BASE_URL = "http://localhost:8080";
+import axios from "axios";
 
-export async function createProduct(type, productData) {
-  const res = await fetch(`${BASE_URL}/${type}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(productData),
-  });
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+});
 
-  if (!res.ok) {
-    throw new Error("상품 등록 실패");
-  }
+export const getProducts = async (type) => {
+  const res = await api.get(`/${type}`);
+  return res.data;
+};
 
-  return res.json();
-}
+export const createProduct = async (type, productData) => {
+  const res = await api.post(`/${type}`, productData);
+  return res.data;
+};
 
-export async function getProducts(type) {
-  const res = await fetch(`${BASE_URL}/${type}`);
+export const getProductDetail = async (type, id) => {
+  const res = await api.get(`/${type}/${id}`);
+  return res.data;
+};
 
-  if (!res.ok) {
-    throw new Error("상품 조회 실패");
-  }
+export const updateProduct = async (type, id, productData) => {
+  const res = await api.patch(`/${type}/${id}`, productData);
+  return res.data;
+};
 
-  return res.json();
-}
-
-export async function getProductDetail(type, id) {
-  const res = await fetch(`${BASE_URL}/${type}/${id}`);
-
-  if (!res.ok) {
-    throw new Error("상품 상세 조회 실패");
-  }
-
-  return res.json();
-}
-
-export async function deleteProduct(type, id) {
-  const res = await fetch(`${BASE_URL}/${type}/${id}`, {
-    method: "DELETE",
-  });
-
-  if (!res.ok) {
-    throw new Error("상품 삭제 실패");
-  }
-
-  return res.json();
-}
-export async function updateProduct(type, id, productData) {
-  const res = await fetch(`${BASE_URL}/${type}/${id}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(productData),
-  });
-
-  if (!res.ok) {
-    throw new Error("상품 수정 실패");
-  }
-
-  return res.json();
-}
+export const deleteProduct = async (type, id) => {
+  const res = await api.delete(`/${type}/${id}`);
+  return res.data;
+};
