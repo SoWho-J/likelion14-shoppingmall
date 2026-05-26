@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import UploadIconImage from "../../assets/icons/UploadIcon.png";
-import { getProductDetail, updateProduct } from "../../api/productApi";
+import { getProductDetail, patchProduct } from "../../api/productApi";
 import { useNavigate, useParams } from "react-router-dom";
 
 const CATEGORY_OPTIONS = ["의류", "신발"];
@@ -22,6 +22,8 @@ export default function EditProduct() {
   const { type, id } = useParams();
   const navigate = useNavigate();
 
+  const [originalProduct, setOriginalProduct] = useState(null);
+
   const [image, setImage] = useState("");
   const [name, setName] = useState("");
   const [rating, setRating] = useState("");
@@ -38,11 +40,13 @@ export default function EditProduct() {
       try {
         const data = await getProductDetail(type, id);
 
+        setOriginalProduct(data);
+
         setImage(data.image);
         setName(data.name);
-        setRating(data.rating);
-        setReviews(data.reviews);
-        setPrice(data.price);
+        setRating(String(data.rating));
+        setReviews(String(data.reviews));
+        setPrice(String(data.price));
         setSize(data.size);
 
         setSelectedCategory(type === "shoes" ? "신발" : "의류");
@@ -77,24 +81,56 @@ export default function EditProduct() {
       return;
     }
 
-    const updatedProduct = {
-      image,
-      name,
-      rating: Number(rating),
-      reviews: Number(reviews),
-      price: Number(price),
-      color: selectedColor,
-      size,
-      gender:
-        selectedGender === "남성"
-          ? "male"
-          : selectedGender === "여성"
-            ? "female"
-            : "unisex",
-    };
+    if (!originalProduct) return;
+
+    const nextGender =
+      selectedGender === "남성"
+        ? "male"
+        : selectedGender === "여성"
+          ? "female"
+          : "unisex";
+
+    const patchData = {};
+
+    if (image !== originalProduct.image) {
+      patchData.image = image;
+    }
+
+    if (name !== originalProduct.name) {
+      patchData.name = name;
+    }
+
+    if (Number(rating) !== Number(originalProduct.rating)) {
+      patchData.rating = Number(rating);
+    }
+
+    if (Number(reviews) !== Number(originalProduct.reviews)) {
+      patchData.reviews = Number(reviews);
+    }
+
+    if (Number(price) !== Number(originalProduct.price)) {
+      patchData.price = Number(price);
+    }
+
+    if (size !== originalProduct.size) {
+      patchData.size = size;
+    }
+
+    if (selectedColor !== originalProduct.color) {
+      patchData.color = selectedColor;
+    }
+
+    if (nextGender !== originalProduct.gender) {
+      patchData.gender = nextGender;
+    }
+
+    if (Object.keys(patchData).length === 0) {
+      alert("변경된 내용이 없습니다.");
+      return;
+    }
 
     try {
-      await updateProduct(type, id, updatedProduct);
+      await patchProduct(type, id, patchData);
       navigate(`/item/${type}/${id}`);
     } catch (error) {
       console.error(error);
